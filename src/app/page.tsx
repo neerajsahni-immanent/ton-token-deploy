@@ -4,9 +4,11 @@ import { TonConnectButton, useTonAddress, useTonConnectUI } from "@tonconnect/ui
 import { useState } from "react";
 import { createDeployParams, DEFAULT_DECIMALS, toDecimalsBN } from "./lib/jetton-minter";
 import { jettonDeployController, JettonDeployParams } from "./lib/jetton-controller";
-import { Address } from "ton";
+import { Address, Cell } from "ton";
 import { ContractDeployer } from "./lib/contract-deployer";
 import WalletConnection from "./lib/wallet-connection";
+import { createVestingContractCell, JETTON_MINTER_CODE, VESTING_DEPLOY_GAS, VestingDeployParams } from "./lib/vesting-minter";
+import TonWeb from "tonweb";
 
 
 
@@ -16,7 +18,7 @@ export default function Home() {
   const [tonconnect] = useTonConnectUI();
   const [isLoading, setIsLoading] = useState(false);
   const [tokenDetail, setTokenDetail] = useState<any>({})
-  const formDetail = [{
+   const formDetail = [{
     type: "text",
     name: "name",
     placeholder: "Enter token name, e.g., MyToken",
@@ -44,7 +46,14 @@ export default function Home() {
     className: "form-control",
     value: tokenDetail?.decimal,
 
-  }];
+  },
+{
+  type: "text",
+  name: "description",
+  placeholder: "Description",
+  className: "form-control",
+  value: tokenDetail?.description,
+}];
 
   async function fetchDecimalsOffchain(url: string): Promise<{ decimals?: string }> {
     let res = await fetch(url);
@@ -71,7 +80,7 @@ export default function Home() {
       onchainMetaData: {
         name: data.name,
         symbol: data.symbol,
-        image: data.tokenImage,
+        image: 'https://gateway.pinata.cloud/ipfs/QmbJXSRWbdeGWCqnrpDNbXRGSfAa6CMbTAoeStejtZPWZK',
         description: data.description,
         decimals: parseInt(decimals).toFixed(0),
       },
@@ -117,6 +126,9 @@ console.log(isDeployed,"ISdeployed", deployParams, data);
       setIsLoading(false);
     }
   }
+
+
+ 
   return (
     <div>Ton Integration
       {<TonConnectButton />}

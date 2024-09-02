@@ -3,6 +3,7 @@ import { Address, beginCell, Cell, toNano, TonClient, Wallet } from "ton";
 
 import { initData, JettonMetaDataKeys, JETTON_MINTER_CODE, mintBody } from "./jetton-minter";
 import { JETTON_DEPLOY_GAS, JettonDeployParams } from "./jetton-controller";
+import { initDataForVesting, VESTING_DEPLOY_GAS, VestingDeployParams } from "./vesting-minter";
 
 export async function sleep(time: number) {
   return new Promise((resolve) => {
@@ -54,6 +55,19 @@ export const createDeployParams = (params: JettonDeployParams, offchainUri?: str
     data: initData(params.owner, params.onchainMetaData, offchainUri),
     deployer: params.owner,
     value: JETTON_DEPLOY_GAS,
+    // message: mintBody(params.owner, params.amountToMint, toNano(0.2), queryId),
+  };
+};
+
+
+export const createVestingDeployParams = (params: VestingDeployParams, offchainUri?: string) => {
+  const queryId = parseInt(process.env.REACT_APP_DEPLOY_QUERY_ID ?? "0");
+
+  return {
+    code: JETTON_MINTER_CODE,
+    data: initDataForVesting(params.owner, params.onchainMetaData, offchainUri),
+    deployer: params.owner,
+    value: VESTING_DEPLOY_GAS,
     // message: mintBody(params.owner, params.amountToMint, toNano(0.2), queryId),
   };
 };
