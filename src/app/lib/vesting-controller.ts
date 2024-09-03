@@ -7,30 +7,28 @@ import {  createVestingDeployParams, waitForContractDeploy, waitForSeqno } from 
 import { makeGetCall } from "./make-get-call";
 
 class VestingController {
-async createVesting(params:VestingDeployParams, tonConnection: TonConnectUI) : Promise<Address>{
+async createVesting(
+  params:VestingDeployParams, 
+  tonConnection: TonConnectUI
+) : Promise<Address>{
     const contractDeployer = new ContractDeployer();
     const tc = await getClient();
     const balance = await tc.getBalance(params.owner);
+    console.log(balance.lt(VESTING_DEPLOY_GAS), params.owner);
     if (balance.lt(VESTING_DEPLOY_GAS)) throw new Error("Not enough balance in deployer wallet");
       const deployParams = createVestingDeployParams(params, params.offchainUri);
       const contractAddr = contractDeployer.addressForContract(deployParams);
-
+console.log(contractAddr,"CONT", deployParams, params);
       if (await tc.isContractDeployed(contractAddr)) {
-        // params.onProgress?.(JettonDeployState.ALREADY_DEPLOYED);
+        console.log("deployed contract");
+        await contractDeployer.deployContract(deployParams, tonConnection);
+        await waitForContractDeploy(contractAddr, tc);
       } else {
         await contractDeployer.deployContract(deployParams, tonConnection);
-        // params.onProgress?.(JettonDeployState.AWAITING_MINTER_DEPLOY);
         await waitForContractDeploy(contractAddr, tc);
+        console.log("wait over");
       }
 
-
-      const ownerJWalletAddr = await makeGetCall(
-        contractAddr,
-        "get_wallet_address",
-        [beginCell().storeAddress(params.owner).endCell()],
-        ([addr]) => (addr as Cell).beginParse().readAddress()!,
-        tc,
-      );
       return contractAddr;
 }
 

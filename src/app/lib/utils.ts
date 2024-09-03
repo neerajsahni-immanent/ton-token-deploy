@@ -62,7 +62,7 @@ export const createDeployParams = (params: JettonDeployParams, offchainUri?: str
 
 export const createVestingDeployParams = (params: VestingDeployParams, offchainUri?: string) => {
   const queryId = parseInt(process.env.REACT_APP_DEPLOY_QUERY_ID ?? "0");
-
+console.log(params,"createVestingDeployParams");
   return {
     code: JETTON_MINTER_CODE,
     data: initDataForVesting(params.owner, params.onchainMetaData, offchainUri),

@@ -7,10 +7,6 @@ import { jettonDeployController, JettonDeployParams } from "./lib/jetton-control
 import { Address, Cell } from "ton";
 import { ContractDeployer } from "./lib/contract-deployer";
 import WalletConnection from "./lib/wallet-connection";
-import { createVestingContractCell, JETTON_MINTER_CODE, VESTING_DEPLOY_GAS, VestingDeployParams } from "./lib/vesting-minter";
-import TonWeb from "tonweb";
-
-
 
 export default function Home() {
   const address = useTonAddress();
@@ -18,7 +14,7 @@ export default function Home() {
   const [tonconnect] = useTonConnectUI();
   const [isLoading, setIsLoading] = useState(false);
   const [tokenDetail, setTokenDetail] = useState<any>({})
-   const formDetail = [{
+  const formDetail = [{
     type: "text",
     name: "name",
     placeholder: "Enter token name, e.g., MyToken",
@@ -47,13 +43,13 @@ export default function Home() {
     value: tokenDetail?.decimal,
 
   },
-{
-  type: "text",
-  name: "description",
-  placeholder: "Description",
-  className: "form-control",
-  value: tokenDetail?.description,
-}];
+  {
+    type: "text",
+    name: "description",
+    placeholder: "Description",
+    className: "form-control",
+    value: tokenDetail?.description,
+  }];
 
   async function fetchDecimalsOffchain(url: string): Promise<{ decimals?: string }> {
     let res = await fetch(url);
@@ -65,7 +61,7 @@ export default function Home() {
     if (!walletAddress || !tonconnect) {
       throw new Error("Wallet not connected");
     }
-    console.log(data,"DATA");
+    console.log(data, "DATA");
 
     let decimals = data.decimals;
     if (data.offchainUri) {
@@ -88,11 +84,12 @@ export default function Home() {
       amountToMint: toDecimalsBN(data.mintAmount || 10, decimals ?? DEFAULT_DECIMALS),
     };
     setIsLoading(true);
+    // await WalletConnection.initializeClient("https://testnet.toncenter.com/api/v2/jsonRPC"); // Replace with your desired endpoint
     const deployParams = createDeployParams(params, data.offchainUri);
     const contractAddress = new ContractDeployer().addressForContract(deployParams);
 
     const isDeployed = await WalletConnection.isContractDeployed(contractAddress);
-console.log(isDeployed,"ISdeployed", deployParams, data);
+    console.log(isDeployed, "ISdeployed", deployParams, data);
     if (isDeployed) {
       // showNotification(
       //   <>
@@ -109,7 +106,7 @@ console.log(isDeployed,"ISdeployed", deployParams, data);
 
     try {
       const result = await jettonDeployController.createJetton(params, tonconnect, walletAddress);
-      console.log(result,"result");
+      console.log(result, "result");
       // analytics.sendEvent(
       //   AnalyticsCategory.DEPLOYER_PAGE,
       //   AnalyticsAction.DEPLOY,
@@ -128,7 +125,7 @@ console.log(isDeployed,"ISdeployed", deployParams, data);
   }
 
 
- 
+
   return (
     <div>Ton Integration
       {<TonConnectButton />}
@@ -145,11 +142,11 @@ console.log(isDeployed,"ISdeployed", deployParams, data);
                 name={item.name}
                 id="token-name"
                 className="h-10 font-medium border-b-2 border-green-600 focus:outline-none focus:border-green-800 w-full"
-                onChange={(e)=> setTokenDetail((prev :any)=> ({...prev, [e.target.name]: e.target.value}))}
+                onChange={(e) => setTokenDetail((prev: any) => ({ ...prev, [e.target.name]: e.target.value }))}
               />
             </>
           ))}
-        <button className="btn" onClick={()=>deployContract(tokenDetail)} >Create Token</button>
+          <button className="btn" onClick={() => deployContract(tokenDetail)} >Create Token</button>
 
         </div>
       </div>
