@@ -3,190 +3,185 @@ import { VESTING_DEPLOY_GAS, VestingDeployParams } from "./vesting-minter";
 import { Address, beginCell, Cell, toNano } from "ton";
 import { ContractDeployer } from "./contract-deployer";
 import { getClient } from "./get-ton-client";
-import {  createVestingDeployParams, waitForContractDeploy, waitForSeqno } from "./utils";
+import {
+  createVestingDeployParams,
+  waitForContractDeploy,
+  waitForSeqno,
+} from "./utils";
 import { makeGetCall } from "./make-get-call";
 
 class VestingController {
-async createVesting(
-  params:VestingDeployParams, 
-  tonConnection: TonConnectUI
-) : Promise<Address>{
+  async createVesting(
+    params: VestingDeployParams,
+    tonConnection: TonConnectUI
+  ): Promise<Address> {
     const contractDeployer = new ContractDeployer();
     const tc = await getClient();
     const balance = await tc.getBalance(params.owner);
     console.log(balance.lt(VESTING_DEPLOY_GAS), params.owner);
-    if (balance.lt(VESTING_DEPLOY_GAS)) throw new Error("Not enough balance in deployer wallet");
-      const deployParams = createVestingDeployParams(params, params.offchainUri);
-      const contractAddr = contractDeployer.addressForContract(deployParams);
-console.log(contractAddr,"CONT", deployParams, params);
-      if (await tc.isContractDeployed(contractAddr)) {
-        console.log("deployed contract");
-        await contractDeployer.deployContract(deployParams, tonConnection);
-        await waitForContractDeploy(contractAddr, tc);
-      } else {
-        await contractDeployer.deployContract(deployParams, tonConnection);
-        await waitForContractDeploy(contractAddr, tc);
-        console.log("wait over");
-      }
+    if (balance.lt(VESTING_DEPLOY_GAS)) {
+      console.log("errrorrrrrr");
 
-      return contractAddr;
-}
+      throw new Error("Not enough balance in deployer wallet");
+    }
 
-async depositTokens(contractAddress:Address, tonConnection:TonConnectUI, walletAddress:string, amount:number){
+    console.log(
+      "seeee",
+      params,
+      "https://testnet.toncenter.com/api/v2/jsonRPC",
+      params.owner
+    );
+
+    const deployParams = createVestingDeployParams(
+      params,
+      "https://testnet.toncenter.com/api/v2/jsonRPC"
+    );
+    console.log(
+      "seeee222",
+      params,
+      "https://testnet.toncenter.com/api/v2/jsonRPC",
+      params.owner
+    );
+    const contractAddr = contractDeployer.addressForContract(deployParams);
+
+    console.log(
+      "seeee3333",
+      params,
+      "https://testnet.toncenter.com/api/v2/jsonRPC",
+      params.owner
+    );
+    console.log(contractAddr, "CONT", deployParams, params);
+    if (await tc.isContractDeployed(contractAddr)) {
+      console.log("deployed contract");
+      await contractDeployer.deployContract(deployParams, tonConnection);
+      await waitForContractDeploy(contractAddr, tc);
+    } else {
+      await contractDeployer.deployContract(deployParams, tonConnection);
+      await waitForContractDeploy(contractAddr, tc);
+      console.log("wait over");
+    }
+
+    return contractAddr;
+  }
+
+  async depositTokens(
+    contractAddress: Address,
+    tonConnection: TonConnectUI,
+    walletAddress: string,
+    amount: number
+  ) {
     const tc = await getClient();
     const waiter = await waitForSeqno(
       tc.openWalletFromAddress({
         source: Address.parse(walletAddress),
-      }),
+      })
     );
     const tx: SendTransactionRequest = {
-        validUntil: Date.now() + 5 * 60 * 1000,
-        messages: [
-          {
-            address: contractAddress.toString(),
-            amount: toNano(0.01).toString(),
-            stateInit: undefined,
-            // payload: changeAdminBody(zeroAddress()).toBoc().toString("base64"),
-          },
-        ],
-      };
-  
-      await tonConnection.sendTransaction(tx);
-  
-      await waiter();
-}
-async addToken(contractAddress:Address, tonConnection:TonConnectUI, walletAddress:string, amount:number){
+      validUntil: Date.now() + 5 * 60 * 1000,
+      messages: [
+        {
+          address: contractAddress.toString(),
+          amount: toNano(0.01).toString(),
+          stateInit: undefined,
+          // payload: changeAdminBody(zeroAddress()).toBoc().toString("base64"),
+        },
+      ],
+    };
+
+    await tonConnection.sendTransaction(tx);
+
+    await waiter();
+  }
+  async addToken(
+    contractAddress: Address,
+    tonConnection: TonConnectUI,
+    walletAddress: string,
+    amount: number
+  ) {
     const tc = await getClient();
     const waiter = await waitForSeqno(
       tc.openWalletFromAddress({
         source: Address.parse(walletAddress),
-      }),
+      })
     );
     const tx: SendTransactionRequest = {
-        validUntil: Date.now() + 5 * 60 * 1000,
-        messages: [
-          {
-            address: contractAddress.toString(),
-            amount: toNano(0.01).toString(),
-            stateInit: undefined,
-            // payload: changeAdminBody(zeroAddress()).toBoc().toString("base64"),
-          },
-        ],
-      };
-  
-      await tonConnection.sendTransaction(tx);
-}
-async claimTokens(contractAddress:Address , tonConnection:TonConnectUI, walletAddress:string){
+      validUntil: Date.now() + 5 * 60 * 1000,
+      messages: [
+        {
+          address: contractAddress.toString(),
+          amount: toNano(0.01).toString(),
+          stateInit: undefined,
+          // payload: changeAdminBody(zeroAddress()).toBoc().toString("base64"),
+        },
+      ],
+    };
+
+    await tonConnection.sendTransaction(tx);
+  }
+  async claimTokens(
+    contractAddress: Address,
+    tonConnection: TonConnectUI,
+    walletAddress: string
+  ) {
     const tc = await getClient();
     const waiter = await waitForSeqno(
       tc.openWalletFromAddress({
         source: Address.parse(walletAddress),
-      }),
+      })
     );
     const tx: SendTransactionRequest = {
-        validUntil: Date.now() + 5 * 60 * 1000,
-        messages: [
-          {
-            address: contractAddress.toString(),
-            amount: toNano(0.04).toString(),
-            stateInit: undefined,
-            // payload: mintBody(Address.parse(walletAddress), amount, toNano(0.02), 0)
-            //   .toBoc()
-            //   .toString("base64"),
-          },
-        ],
-      };
+      validUntil: Date.now() + 5 * 60 * 1000,
+      messages: [
+        {
+          address: contractAddress.toString(),
+          amount: toNano(0.04).toString(),
+          stateInit: undefined,
+          // payload: mintBody(Address.parse(walletAddress), amount, toNano(0.02), 0)
+          //   .toBoc()
+          //   .toString("base64"),
+        },
+      ],
+    };
 
-      await tonConnection.sendTransaction(tx);
-      await waiter();
+    await tonConnection.sendTransaction(tx);
+    await waiter();
+  }
+  async pause() {}
+  async renounceOwnership() {}
+  async transferOwnership(walletAddress: Address) {}
+  async unpause() {}
 
+  async withdrawToken(
+    contractAddress: Address,
+    tonConnection: TonConnectUI,
+    tokenAmount: number
+  ) {}
+  async getCalculateUnlockedToken(walletAddress: string) {}
+  async getCliffDuration() {}
+  async getCliffPercentage() {}
+  async getEndDateTime() {}
+  async getMaxBuy() {}
+  async getMaxCap() {}
+  async getMinBuy() {}
+  async getOwner() {}
+  async getPaused() {}
+  async getProjectName() {}
+  async getProjectOwner() {}
+  async getStartDateTime() {}
+  async getToken() {}
+  async getTokenAddress() {}
+  async getTokenPrice() {}
+  async getTotalParticipants() {}
+
+  async getTotalRaised() {}
+  async getUserDetails(walletAddress: string) {}
+  async getVestingDuration() {}
+  async getVestingInterval() {}
+  async getVestingStartTime() {}
 }
-async pause(){
-
-}
-async renounceOwnership(){
-
-}
-async transferOwnership(walletAddress:Address){
-
-}
-async unpause(){
-
-}
-
-async withdrawToken(contractAddress:Address, tonConnection:TonConnectUI, tokenAmount:number){
-
-}
-async getCalculateUnlockedToken(walletAddress:string){
-
-}
-async getCliffDuration(){
-
-}
-async getCliffPercentage(){
-
-}
-async getEndDateTime(){
-
-}
-async getMaxBuy(){
-
-}
-async getMaxCap(){
-
-}
-async getMinBuy(){
-
-}
-async getOwner(){
-
-}
-async getPaused(){
-
-}
-async getProjectName(){
-
-}
-async getProjectOwner(){
-
-}
-async getStartDateTime(){
-
-}
-async getToken(){
-
-}
-async getTokenAddress(){
-
-}
-async getTokenPrice(){
-
-}
-async getTotalParticipants(){
-
-}
-
-async getTotalRaised(){
-
-}
-async getUserDetails(walletAddress:string){
-
-}
-async getVestingDuration(){
-
-}
-async getVestingInterval(){
-
-}
-async getVestingStartTime(){
-
-}
-}
-
 
 const vestingDeployController = new VestingController();
 export { vestingDeployController };
-
 
 // import { Address, beginCell, Cell, toNano } from "ton";
 // // import { TonConnectUI, SendTransactionRequest } from ""
@@ -230,21 +225,21 @@ export { vestingDeployController };
 //   ): Promise<Address> {
 //     const contractDeployer = new ContractDeployer(); // Assume ContractDeployer is a utility class similar to your JettonDeployController
 //     const tc = await getClient();
-    
+
 //     // Check balance
 //     const balance = await tc.getBalance(params.owner);
 //     if (balance.lt(VESTING_DEPLOY_GAS)) throw new Error("Not enough balance in deployer wallet");
-    
-//     const deployParams = createVestingDeployParams(params, params.offchainUri);
+
+//     const deployParams = createVestingDeployParams(params, "https://testnet.toncenter.com/api/v2/jsonRPC");
 //     const contractAddr = contractDeployer.addressForContract(deployParams);
-    
+
 //     if (await tc.isContractDeployed(contractAddr)) {
 //       console.log("Contract already deployed");
 //     } else {
 //       await contractDeployer.deployContract(deployParams, tonConnection);
 //       await waitForContractDeploy(contractAddr, tc);
 //     }
-    
+
 //     // Assuming you have a method to get the wallet address
 //     const ownerVestingWalletAddr = await makeGetCall(
 //       contractAddr,
@@ -253,7 +248,7 @@ export { vestingDeployController };
 //       ([addr]) => (addr as Cell).beginParse().readAddress()!,
 //       tc
 //     );
-    
+
 //     await waitForContractDeploy(ownerVestingWalletAddr, tc);
 //     return contractAddr;
 //   }
@@ -270,7 +265,7 @@ export { vestingDeployController };
 //         source: Address.parse(walletAddress),
 //       })
 //     );
-    
+
 //     const body = updateVestingBody(buildVestingOnchainMetadata(data)); // Build the metadata update payload
 //     const tx: SendTransactionRequest = {
 //       validUntil: Date.now() + 5 * 60 * 1000,
@@ -283,7 +278,7 @@ export { vestingDeployController };
 //         }
 //       ],
 //     };
-    
+
 //     await tonConnection.sendTransaction(tx);
 //     await waiter();
 //   }
@@ -299,7 +294,7 @@ export { vestingDeployController };
 //       }),
 //       tc
 //     );
-    
+
 //     const vestingWalletAddress = await makeGetCall(
 //       contractAddr,
 //       "get_wallet_address",
@@ -307,9 +302,9 @@ export { vestingDeployController };
 //       ([addressCell]) => cellToAddress(addressCell),
 //       tc
 //     );
-    
+
 //     const isDeployed = await tc.isContractDeployed(vestingWalletAddress);
-    
+
 //     let vestingWallet;
 //     if (isDeployed) {
 //       vestingWallet = await makeGetCall(
@@ -326,13 +321,13 @@ export { vestingDeployController };
 //     } else {
 //       vestingWallet = null;
 //     }
-    
+
 //     return {
 //       vestingDetails,
 //       vestingWallet
 //     };
 //   }
-  
+
 //   async executeVestingAction(
 //     action: string,
 //     params: any, // Define more specific types based on actions
@@ -345,7 +340,7 @@ export { vestingDeployController };
 //         source: Address.parse(walletAddress),
 //       })
 //     );
-    
+
 //     const tx: SendTransactionRequest = {
 //       validUntil: Date.now() + 5 * 60 * 1000,
 //       messages: [
@@ -357,7 +352,7 @@ export { vestingDeployController };
 //         }
 //       ],
 //     };
-    
+
 //     await tonConnection.sendTransaction(tx);
 //     await waiter();
 //   }

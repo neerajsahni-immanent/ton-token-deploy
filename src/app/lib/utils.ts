@@ -1,9 +1,13 @@
 import BN from "bn.js";
 import { Address, beginCell, Cell, toNano, TonClient, Wallet } from "ton";
 
-import { initData, JettonMetaDataKeys, JETTON_MINTER_CODE, mintBody } from "./jetton-minter";
+import { JETTON_MINTER_CODE } from "./vesting-minter";
 import { JETTON_DEPLOY_GAS, JettonDeployParams } from "./jetton-controller";
-import { initDataForVesting, VESTING_DEPLOY_GAS, VestingDeployParams } from "./vesting-minter";
+import {
+  initDataForVesting,
+  VESTING_DEPLOY_GAS,
+  VestingDeployParams,
+} from "./vesting-minter";
 
 export async function sleep(time: number) {
   return new Promise((resolve) => {
@@ -35,7 +39,10 @@ export async function waitForSeqno(wallet: Wallet) {
   };
 }
 
-export async function waitForContractDeploy(address: Address, client: TonClient) {
+export async function waitForContractDeploy(
+  address: Address,
+  client: TonClient
+) {
   let isDeployed = false;
   let maxTries = 25;
   while (!isDeployed && maxTries > 0) {
@@ -47,7 +54,10 @@ export async function waitForContractDeploy(address: Address, client: TonClient)
   throw new Error("Timeout");
 }
 
-export const createDeployParams = (params: JettonDeployParams, offchainUri?: string) => {
+export const createDeployParams = (
+  params: JettonDeployParams,
+  offchainUri?: string
+) => {
   const queryId = parseInt(process.env.REACT_APP_DEPLOY_QUERY_ID ?? "0");
 
   return {
@@ -59,10 +69,12 @@ export const createDeployParams = (params: JettonDeployParams, offchainUri?: str
   };
 };
 
-
-export const createVestingDeployParams = (params: VestingDeployParams, offchainUri?: string) => {
+export const createVestingDeployParams = (
+  params: VestingDeployParams,
+  offchainUri?: string
+) => {
   const queryId = parseInt(process.env.REACT_APP_DEPLOY_QUERY_ID ?? "0");
-console.log(params,"createVestingDeployParams");
+  console.log(params, "createVestingDeployParams");
   return {
     code: JETTON_MINTER_CODE,
     data: initDataForVesting(params.owner, params.onchainMetaData, offchainUri),
