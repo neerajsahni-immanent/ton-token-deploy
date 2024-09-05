@@ -30,7 +30,7 @@ const DeployVestingContract = () => {
   const [vestingDetail, setVestingDetail] = useState<VestingDeployParams>({
     onchainMetaData: {
       // id: "1",
-      cliffDuration: 180, // 180 days
+      cliffDuration: 150, // 180 days
       vestingStartTime: 1725590436,
       vestingDuration: 360, // 360 days
       vestingInterval: 30, // 30 days
@@ -48,10 +48,10 @@ const DeployVestingContract = () => {
       ),
       owner: Address.parse("kQCCc7D4PUhv7Yu740G_ROW_cH2fEuq6KC5PHGr9DSOadhhH"),
 
-      maxCap: 1000000, // 1,000,000 tokens
-      minBuy: 100, // 100 tokens
-      maxBuy: 10000, // 10,000 tokens
-      tokenPrice: 100, // $0.01 per token
+      maxCap: 10000000, // 1,000,000 tokens
+      minBuy: 1000, // 100 tokens
+      maxBuy: 100000, // 10,000 tokens
+      tokenPrice: 10, // $0.01 per token
 
       // tokenAddress: Address.parse(
       //   "kQCCc7D4PUhv7Yu740G_ROW_cH2fEuq6KC5PHGr9DSOadhhH"

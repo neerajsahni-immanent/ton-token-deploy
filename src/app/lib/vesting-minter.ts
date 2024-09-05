@@ -118,50 +118,48 @@ export function buildVestingOnchainMetadata(data: {
     .endCell();
 }
 
-export function createVestingContractCell(params: VestingDeployParams): Cell {
+export function createVestingContractCell(params: any): Cell {
   const cellBuilder = beginCell();
 
   // Add basic contract information
   cellBuilder.storeUint(0, 32); // Example placeholder for any initial contract identifier if needed
 
   // Check if owner address is correctly defined
-  if (params.owner && params.owner instanceof Address) {
+  if (params) {
     cellBuilder.storeAddress(params.owner);
   } else {
     throw new Error("Invalid owner address");
   }
 
   // Serialize on-chain metadata if provided
-  if (params.onchainMetaData) {
-    console.log(params.onchainMetaData, "check1");
+  if (params) {
+    console.log(params, "check1");
 
     cellBuilder.storeUint(ONCHAIN_CONTENT_PREFIX, 8); // Indicate on-chain metadata follows
-    cellBuilder.storeUint(params.onchainMetaData.cliffDuration, 32);
-    cellBuilder.storeUint(params.onchainMetaData.vestingStartTime, 32);
-    cellBuilder.storeUint(params.onchainMetaData.vestingDuration, 32);
-    cellBuilder.storeUint(params.onchainMetaData.vestingInterval, 32);
-    cellBuilder.storeUint(params.onchainMetaData.cliffPercentage, 32);
-    cellBuilder.storeUint(params.onchainMetaData.startDateTime, 32);
-    cellBuilder.storeUint(params.onchainMetaData.endDateTime, 32);
-    cellBuilder.storeUint(params.onchainMetaData.maxCap, 32);
-    cellBuilder.storeUint(params.onchainMetaData.minBuy, 32);
-    cellBuilder.storeUint(params.onchainMetaData.maxBuy, 32);
-    cellBuilder.storeUint(params.onchainMetaData.tokenPrice, 32);
+    cellBuilder.storeUint(params.cliffDuration, 32);
+    cellBuilder.storeUint(params.vestingStartTime, 32);
+    cellBuilder.storeUint(params.vestingDuration, 32);
+    cellBuilder.storeUint(params.vestingInterval, 32);
+    cellBuilder.storeUint(params.cliffPercentage, 32);
+    cellBuilder.storeUint(params.projectStartTime, 32);
+    cellBuilder.storeUint(params.projectEndTime, 32);
+    cellBuilder.storeUint(params.maxCap, 32);
+    cellBuilder.storeUint(params.minBuy, 32);
+    cellBuilder.storeUint(params.maxBuy, 32);
+    cellBuilder.storeUint(params.tokenPrice, 32);
 
     // Convert and store projectName
-    if (params.onchainMetaData.projectName) {
-      const projectNameBytes = Buffer.from(
-        params.onchainMetaData.projectName,
-        "utf-8"
-      );
+    if (params) {
+      const projectNameBytes = Buffer.from(params.projectName, "utf-8");
       cellBuilder.storeBuffer(projectNameBytes);
     } else {
       throw new Error("Project name is undefined");
     }
 
     // Convert and store other string fields
-    if (params.onchainMetaData.tokenAddress) {
-      cellBuilder.storeAddress(params.onchainMetaData.tokenAddress);
+    if (params) {
+      cellBuilder.storeAddress(params.ICOToken);
+      cellBuilder.storeAddress(params.investmentToken);
     } else {
       throw new Error("Token address is undefined");
     }
